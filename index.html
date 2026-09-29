@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mimikara N3 - Unit 01 (1-50 Sakura Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Noto+Sans+JP:wght@600;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', 'Comfortaa', sans-serif;
+            background: url('https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat fixed;
+            overflow-x: hidden;
+        }
+        .bg-overlay {
+            background: rgba(255, 248, 242, 0.55);
+            backdrop-filter: blur(10px);
+        }
+        /* Canvas hiệu ứng cánh hoa rơi */
+        #sakura-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .main-content {
+            position: relative;
+            z-index: 10;
+        }
+        .font-jp {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .sakura-card {
+            background: rgba(255, 253, 249, 0.94);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 16px 40px rgba(184, 80, 110, 0.12);
+        }
+        .badge-pill {
+            background: #FFEAD5;
+            color: #8C4A27;
+        }
+        .btn-option {
+            background: #FFFFFF;
+            border: 2px solid #FFDFC2;
+            color: #5C3A21;
+            transition: all 0.2s ease;
+        }
+        .btn-option:hover {
+            background: #FFF5EC;
+            border-color: #FFB885;
+            transform: translateY(-1px);
+        }
+        .btn-option.correct {
+            background: #E8F5E9 !important;
+            border-color: #66BB6A !important;
+            color: #2E7D32 !important;
+        }
+        .btn-option.wrong {
+            background: #FFEBEE !important;
+            border-color: #EF5350 !important;
+            color: #C62828 !important;
+        }
+    </style>
+</head>
+<body class="bg-overlay min-h-screen flex flex-col justify-between items-center py-6 px-4 relative">
+
+    <!-- Canvas Cánh Hoa Anh Đào Rơi -->
+    <canvas id="sakura-canvas"></canvas>
+
+    <!-- Container Chính -->
+    <div class="main-content w-full max-w-md my-auto">
+        
+        <!-- Tab Chuyển đổi Mode -->
+        <div class="flex justify-center gap-2 mb-4">
+            <button id="btn-mode-quiz" onclick="switchMode('quiz')" class="px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-amber-950 shadow-sm border border-amber-200">
+                🌸 Trắc nghiệm
+            </button>
+            <button id="btn-mode-typing" onclick="switchMode('typing')" class="px-4 py-2 rounded-full text-xs font-bold transition-all bg-white/70 text-amber-900 hover:bg-white">
+                ✍️ Luyện gõ
+            </button>
+        </div>
+
+        <!-- Khung Giao Diện Bo Tròn -->
+        <div class="sakura-card rounded-[38px] p-6 text-slate-800 border-2 border-white/90 relative">
+            
+            <!-- SECTION 1: TRẮC NGHIỆM 4 ĐÁP ÁN -->
+            <section id="section-quiz" class="space-y-4">
+                <h1 class="text-center font-bold text-lg text-amber-950 flex items-center justify-center gap-2">
+                    🌸 Mimikara N3 - Bài 1 (1-50) 🌸
+                </h1>
+
+                <!-- Progress Header -->
+                <div class="badge-pill rounded-full px-5 py-2 flex justify-between items-center text-xs font-bold">
+                    <span id="quiz-progress-text">Câu: 1 / 50</span>
+                    <span id="quiz-score-text" class="flex items-center gap-1">Điểm: 0 <span class="text-sm">🌸</span></span>
+                </div>
+
+                <!-- Word Card -->
+                <div class="text-center space-y-2 py-2">
+                    <div class="inline-block bg-orange-100/80 text-amber-900 border border-dashed border-orange-300 rounded-full px-4 py-1 text-sm font-bold tracking-wider">
+                        <span id="quiz-hiragana">だんせい</span>
+                    </div>
+                    
+                    <h2 id="quiz-kanji" class="font-jp text-5xl font-extrabold text-amber-950 py-1">男性</h2>
+                    
+                    <p id="quiz-hanviet" class="text-xs font-bold text-amber-800/70 uppercase tracking-widest">[ NAM TÍNH ]</p>
+                </div>
+
+                <!-- 4 Option Buttons -->
+                <div id="quiz-options-container" class="space-y-3 pt-1">
+                </div>
+            </section>
+
+
+            <!-- SECTION 2: LUYỆN GÕ HIRAGANA -->
+            <section id="section-typing" class="hidden space-y-4">
+                <h1 class="text-center font-bold text-lg text-amber-950 flex items-center justify-center gap-2">
+                    ✍️ Luyện Gõ Hiragana 🌸
+                </h1>
+
+                <div class="badge-pill rounded-full px-5 py-2 flex justify-between items-center text-xs font-bold">
+                    <span id="tp-progress-text">Câu: 1 / 50</span>
+                    <div class="flex gap-3">
+                        <span class="text-emerald-800">Đúng: <span id="tp-score-correct">0</span></span>
+                        <span class="text-rose-600">Sai: <span id="tp-score-wrong">0</span></span>
+                    </div>
+                </div>
+
+                <div class="text-center space-y-2 py-4">
+                    <span id="tp-hanviet" class="inline-block bg-orange-100/80 text-amber-900 border border-dashed border-orange-300 rounded-full px-4 py-1 text-xs font-bold">NAM TÍNH</span>
+                    <h2 id="tp-kanji" class="font-jp text-6xl font-extrabold text-amber-950 py-2">男性</h2>
+                </div>
+
+                <form onsubmit="submitTyping(event)" class="space-y-3">
+                    <input type="text" id="tp-input" autocomplete="off" spellcheck="false" placeholder="Gõ Hiragana vào đây..." 
+                        class="w-full text-center text-base font-bold font-jp py-3 px-4 bg-orange-50/50 border-2 border-orange-200 rounded-full focus:border-amber-500 focus:bg-white focus:outline-none transition text-amber-950">
+                    
+                    <div class="flex gap-2">
+                        <button type="button" onclick="skipTyping()" class="w-1/3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-full text-xs transition">
+                            Bỏ qua
+                        </button>
+                        <button type="submit" class="w-2/3 py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-full text-xs shadow-md transition">
+                            Kiểm tra ✨
+                        </button>
+                    </div>
+                </form>
+
+                <div id="tp-feedback" class="hidden p-3 rounded-2xl text-center text-xs font-bold transition-all">
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-content text-center text-xs font-bold text-amber-950/60 mt-4">
+        Mimikara Oboeru N3 • Sakura Edition 🌸
+    </footer>
+
+    <script>
+        /* --- HIỆU ỨNG CÁNH HOA ANH ĐÀO RƠI --- */
+        const canvas = document.getElementById('sakura-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Petal {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height - height;
+                this.size = Math.random() * 8 + 8;
+                this.speedY = Math.random() * 1.2 + 0.8;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() * 2 - 1;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.angle * Math.PI / 180) * 0.8;
+                this.angle += this.spin;
+
+                if (this.y > height) {
+                    this.y = -20;
+                    this.x = Math.random() * width;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle * Math.PI / 180);
+                ctx.globalAlpha = this.opacity;
+
+                ctx.beginPath();
+                ctx.fillStyle = "#FFB7C5";
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size, this.size / 3, 0, this.size);
+                ctx.bezierCurveTo(this.size, this.size / 3, this.size / 2, -this.size / 2, 0, 0);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        const petals = Array.from({ length: 32 }, () => new Petal());
+
+        function animateSakura() {
+            ctx.clearRect(0, 0, width, height);
+            petals.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateSakura);
+        }
+        animateSakura();
+
+        /* --- DỮ LIỆU TỪ VỰNG MIMIKARA N3 (TỪ 1 ĐẾN 50) --- */
+        const vocabList = [
+            { id: 1, kanji: "男性", hiragana: "だんせい", hanviet: "NAM TÍNH", meaning: "Nam giới, đàn ông" },
+            { id: 2, kanji: "女性", hiragana: "じょせい", hanviet: "NỮ TÍNH", meaning: "Nữ giới, phụ nữ" },
+            { id: 3, kanji: "高齢", hiragana: "こうれい", hanviet: "CAO LINH", meaning: "Cao tuổi, tuổi già" },
+            { id: 4, kanji: "年上", hiragana: "としうえ", hanviet: "NIÊN THƯỢNG", meaning: "Hơn tuổi, lớn tuổi hơn" },
+            { id: 5, kanji: "目上", hiragana: "めうえ", hanviet: "MỤC THƯỢNG", meaning: "Cấp trên, người bề trên" },
+            { id: 6, kanji: "先輩", hiragana: "せんぱい", hanviet: "TIÊN BỐI", meaning: "Tiền bối, người đi trước" },
+            { id: 7, kanji: "後輩", hiragana: "こうはい", hanviet: "HẬU BỐI", meaning: "Hậu bối, người đi sau" },
+            { id: 8, kanji: "上司", hiragana: "じょうし", hanviet: "THƯỢNG TƯ", meaning: "Cấp trên, ông chủ" },
+            { id: 9, kanji: "相手", hiragana: "あいて", hanviet: "TƯƠNG THỦ", meaning: "Đối phương, người đối diện" },
+            { id: 10, kanji: "知り合い", hiragana: "しりあい", hanviet: "TRI HỢP", meaning: "Người quen" },
+            { id: 11, kanji: "友人", hiragana: "ゆうじん", hanviet: "HỮU NHÂN", meaning: "Bạn bè" },
+            { id: 12, kanji: "仲", hiragana: "なか", hanviet: "TRỌNG", meaning: "Mối quan hệ" },
+            { id: 13, kanji: "生年月日", hiragana: "せいねんがっぴ", hanviet: "SINH NIÊN NGUYỆT NHẬT", meaning: "Ngày tháng năm sinh" },
+            { id: 14, kanji: "誕生", hiragana: "たんじょう", hanviet: "ĐẢN SINH", meaning: "Sự ra đời, xản sinh" },
+            { id: 15, kanji: "年", hiragana: "とし", hanviet: "NIÊN", meaning: "Năm, tuổi" },
+            { id: 16, kanji: "出身", hiragana: "しゅっしん", hanviet: "XUẤT THÂN", meaning: "Xuất thân, quê quán" },
+            { id: 17, kanji: "故郷", hiragana: "こきょう", hanviet: "CỐ HƯƠNG", meaning: "Quê hương" },
+            { id: 18, kanji: "成長", hiragana: "せいちょう", hanviet: "THÀNH TRƯỞNG", meaning: "Trưởng thành, phát triển" },
+            { id: 19, kanji: "成人", hiragana: "せいじん", hanviet: "THÀNH NHÂN", meaning: "Người trưởng thành" },
+            { id: 20, kanji: "合格", hiragana: "ごうかく", hanviet: "HỢP CÁCH", meaning: "Thi đỗ, trúng tuyển" },
+            { id: 21, kanji: "進学", hiragana: "しんがく", hanviet: "TIẾN HỌC", meaning: "Học lên cao hơn" },
+            { id: 22, kanji: "退学", hiragana: "たいがく", hanviet: "THOÁI HỌC", meaning: "Bỏ học, thôi học" },
+            { id: 23, kanji: "就職", hiragana: "しゅうしょく", hanviet: "TỰU CHỨC", meaning: "Tìm việc, có việc làm" },
+            { id: 24, kanji: "退職", hiragana: "たいしょく", hanviet: "THOÁI CHỨC", meaning: "Nghỉ việc, nghỉ hưu" },
+            { id: 25, kanji: "失業", hiragana: "しつぎょう", hanviet: "THẤT NGHIỆP", meaning: "Thất nghiệp" },
+            { id: 26, kanji: "残業", hiragana: "ざんぎょう", hanviet: "TÀN NGHIỆP", meaning: "Làm thêm giờ" },
+            { id: 27, kanji: "生活", hiragana: "せいかつ", hanviet: "SINH HOẠT", meaning: "Cuộc sống, sinh hoạt" },
+            { id: 28, kanji: "通勤", hiragana: "つうきん", hanviet: "THÔNG CẦN", meaning: "Đi làm" },
+            { id: 29, kanji: "学歴", hiragana: "がくれき", hanviet: "HỌC LỊCH", meaning: "Bằng cấp, trình độ học vấn" },
+            { id: 30, kanji: "給料", hiragana: "きゅうりょう", hanviet: "CẤP LIỆU", meaning: "Tiền lương" },
+            { id: 31, kanji: "面接", hiragana: "めんせつ", hanviet: "DIỆN TIẾP", meaning: "Phỏng vấn" },
+            { id: 32, kanji: "休憩", hiragana: "きゅうけい", hanviet: "HƯU KHÁI", meaning: "Nghỉ giải lao" },
+            { id: 33, kanji: "観光", hiragana: "かんこう", hanviet: "QUAN QUANG", meaning: "Tham quan, du lịch" },
+            { id: 34, kanji: "帰国", hiragana: "きこく", hanviet: "QUY QUỐC", meaning: "Về nước" },
+            { id: 35, kanji: "帰省", hiragana: "きせい", hanviet: "QUY TỈNH", meaning: "Về quê" },
+            { id: 36, kanji: "帰宅", hiragana: "きたく", hanviet: "QUY TRẠCH", meaning: "Về nhà" },
+            { id: 37, kanji: "参加", hiragana: "さんか", hanviet: "THAM GIA", meaning: "Tham gia" },
+            { id: 38, kanji: "出席", hiragana: "しゅっせき", hanviet: "XUẤT TỊCH", meaning: "Có mặt, tham dự" },
+            { id: 39, kanji: "欠席", hiragana: "けっせき", hanviet: "KHUYẾT TỊCH", meaning: "Vắng mặt, nghỉ học" },
+            { id: 40, kanji: "遅刻", hiragana: "ちこく", hanviet: "TRĨ KHẮC", meaning: "Đến muộn, trễ giờ" },
+            { id: 41, kanji: "化粧", hiragana: "けしょう", hanviet: "HÓA TRANG", meaning: "Trang điểm" },
+            { id: 42, kanji: "計算", hiragana: "けいさん", hanviet: "KẾ TOÁN", meaning: "Tính toán" },
+            { id: 43, kanji: "計画", hiragana: "けいかく", hanviet: "KẾ HOẠCH", meaning: "Lập kế hoạch" },
+            { id: 44, kanji: "成功", hiragana: "せいこう", hanviet: "THÀNH CÔNG", meaning: "Thành công" },
+            { id: 45, kanji: "失敗", hiragana: "しっぱい", hanviet: "THẤT BẠI", meaning: "Thất bại" },
+            { id: 46, kanji: "準備", hiragana: "じゅんび", hanviet: "CHUẨN BỊ", meaning: "Chuẩn bị" },
+            { id: 47, kanji: "整理", hiragana: "せいり", hanviet: "CHỈNH LÝ", meaning: "Sắp xếp, chỉnh lý" },
+            { id: 48, kanji: "注文", hiragana: "ちゅうもん", hanviet: "CHÚ SẮC", meaning: "Đặt hàng, gọi món" },
+            { id: 49, kanji: "貯金", hiragana: "ちょきん", hanviet: "TRỮ KIM", meaning: "Tiết kiệm tiền" },
+            { id: 50, kanji: "徹夜", hiragana: "てつや", hanviet: "TRIỆT DẠ", meaning: "Thức xuyên đêm" }
+        ];
+
+        let quizIndex = 0;
+        let quizScore = 0;
+        let quizDeck = [...vocabList];
+
+        let tpIndex = 0;
+        let tpCorrect = 0;
+        let tpWrong = 0;
+        let tpDeck = [...vocabList];
+
+        window.onload = () => {
+            quizDeck = [...vocabList].sort(() => Math.random() - 0.5);
+            tpDeck = [...vocabList].sort(() => Math.random() - 0.5);
+            renderQuiz();
+            renderTyping();
+        };
+
+        function switchMode(mode) {
+            const btnQuiz = document.getElementById('btn-mode-quiz');
+            const btnTp = document.getElementById('btn-mode-typing');
+            const secQuiz = document.getElementById('section-quiz');
+            const secTp = document.getElementById('section-typing');
+
+            if (mode === 'quiz') {
+                secQuiz.classList.remove('hidden');
+                secTp.classList.add('hidden');
+                btnQuiz.className = "px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-amber-950 shadow-sm border border-amber-200";
+                btnTp.className = "px-4 py-2 rounded-full text-xs font-bold transition-all bg-white/70 text-amber-900 hover:bg-white";
+            } else {
+                secQuiz.classList.add('hidden');
+                secTp.classList.remove('hidden');
+                btnTp.className = "px-4 py-2 rounded-full text-xs font-bold transition-all bg-white text-amber-950 shadow-sm border border-amber-200";
+                btnQuiz.className = "px-4 py-2 rounded-full text-xs font-bold transition-all bg-white/70 text-amber-900 hover:bg-white";
+                document.getElementById('tp-input').focus();
+            }
+        }
+
+        /* --- QUIZ LOGIC --- */
+        function renderQuiz() {
+            if (quizIndex >= quizDeck.length) {
+                document.getElementById('section-quiz').innerHTML = `
+                    <div class="text-center space-y-4 py-6">
+                        <div class="text-4xl">🌸</div>
+                        <h2 class="text-xl font-bold text-amber-950">Hoàn thành xuất sắc 50 từ N3!</h2>
+                        <p class="text-xs text-amber-800">Điểm số: <b class="text-base text-amber-950">${quizScore} / ${quizDeck.length}</b> 🌸</p>
+                        <button onclick="location.reload()" class="px-6 py-2.5 bg-amber-800 text-white font-bold rounded-full text-xs shadow-md">Thử lại từ đầu</button>
+                    </div>
+                `;
+                return;
+            }
+
+            const item = quizDeck[quizIndex];
+            document.getElementById('quiz-progress-text').innerText = `Câu: ${quizIndex + 1} / ${quizDeck.length}`;
+            document.getElementById('quiz-score-text').innerHTML = `Điểm: ${quizScore} <span class="text-sm">🌸</span>`;
+
+            document.getElementById('quiz-kanji').innerText = item.kanji;
+            document.getElementById('quiz-hiragana').innerText = item.hiragana;
+            document.getElementById('quiz-hanviet').innerText = `[ ${item.hanviet} ]`;
+
+            const options = generateOptions(item);
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+
+            options.forEach((optText) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-option w-full py-3.5 px-4 rounded-full text-sm font-bold shadow-sm text-center";
+                btn.innerText = optText;
+                btn.onclick = () => selectQuizOption(btn, optText === item.meaning, item.meaning);
+                container.appendChild(btn);
+            });
+        }
+
+        function generateOptions(currentItem) {
+            let options = [currentItem.meaning];
+            let otherItems = vocabList.filter(v => v.id !== currentItem.id).sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < 3; i++) {
+                options.push(otherItems[i].meaning);
+            }
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function selectQuizOption(selectedBtn, isCorrect, correctMeaning) {
+            const buttons = document.querySelectorAll('#quiz-options-container button');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                quizScore++;
+                selectedBtn.classList.add('correct');
+            } else {
+                selectedBtn.classList.add('wrong');
+                buttons.forEach(btn => {
+                    if (btn.innerText === correctMeaning) btn.classList.add('correct');
+                });
+            }
+
+            setTimeout(() => {
+                quizIndex++;
+                renderQuiz();
+            }, 1200);
+        }
+
+        /* --- TYPING LOGIC --- */
+        function renderTyping() {
+            if (tpIndex >= tpDeck.length) return;
+
+            const item = tpDeck[tpIndex];
+            document.getElementById('tp-progress-text').innerText = `Câu: ${tpIndex + 1} / ${tpDeck.length}`;
+            document.getElementById('tp-score-correct').innerText = tpCorrect;
+            document.getElementById('tp-score-wrong').innerText = tpWrong;
+
+            document.getElementById('tp-hanviet').innerText = item.hanviet;
+            document.getElementById('tp-kanji').innerText = item.kanji;
+            
+            const input = document.getElementById('tp-input');
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+
+            document.getElementById('tp-feedback').classList.add('hidden');
+        }
+
+        function submitTyping(e) {
+            e.preventDefault();
+            const input = document.getElementById('tp-input');
+            const val = input.value.trim().toLowerCase();
+            const item = tpDeck[tpIndex];
+
+            if (!val) return;
+
+            const feedback = document.getElementById('tp-feedback');
+            feedback.classList.remove('hidden');
+            input.disabled = true;
+
+            if (val === item.hiragana.toLowerCase()) {
+                tpCorrect++;
+                feedback.className = "p-3 rounded-2xl bg-emerald-100 text-emerald-900 text-xs font-bold text-center";
+                feedback.innerHTML = `🌸 Chính xác! <b>${item.kanji}</b> = <b>${item.hiragana}</b>`;
+            } else {
+                tpWrong++;
+                feedback.className = "p-3 rounded-2xl bg-rose-100 text-rose-900 text-xs font-bold text-center";
+                feedback.innerHTML = `❌ Chưa đúng! Hiragana đúng là: <b>${item.hiragana}</b>`;
+            }
+
+            setTimeout(() => {
+                tpIndex++;
+                renderTyping();
+            }, 1200);
+        }
+
+        function skipTyping() {
+            const item = tpDeck[tpIndex];
+            tpWrong++;
+            const feedback = document.getElementById('tp-feedback');
+            feedback.classList.remove('hidden');
+            feedback.className = "p-3 rounded-2xl bg-orange-100 text-orange-900 text-xs font-bold text-center";
+            feedback.innerHTML = `⏩ Bỏ qua. Đáp án đúng: <b>${item.hiragana}</b>`;
+
+            setTimeout(() => {
+                tpIndex++;
+                renderTyping();
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
